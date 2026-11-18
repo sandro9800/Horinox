@@ -1,4 +1,4 @@
-name: Build HORIXON .hmod
+name: Build HORIXON .hnmod
 
 on:
   push:
@@ -11,58 +11,32 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  package:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Install the pinned Rust toolchain
-        run: |
-          rustup toolchain install 1.99.1 --profile minimal
-          rustup default 1.99.1
-
-      - name: Cache Cargo and Horizon SDK
-        uses: actions/cache@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            .horizon/sdk
-            target
-          key: ${{ runner.os }}-horixon-0b14f8ac-${{ hashFiles('Cargo.toml') }}
-
-      - name: Download pinned Horizon source
-        run: |
-          curl --fail --location --retry 3 https://codeload.github.com/horizon-rust/horizon/tar.gz/0b14f8acfd97fa2c750e42795249dcc981178ca4 -o /tmp/horizon-sdk.tar.gz
-          mkdir -p /tmp/horizon-sdk
-          tar -xzf /tmp/horizon-sdk.tar.gz -C /tmp/horizon-sdk --strip-components=1
-
-      - name: Install cargo-horizon-mod
-        run: cargo install --locked --path /tmp/horizon-sdk/crates/cargo-horizon-mod
-
-      - name: Check mod API and package layout
-        run: cargo horizon-mod check
-
-      - name: Run HORIXON tests
-        run: cargo test
-
-      - name: Build .hmod package
-        run: cargo horizon-mod build
-
-      - name: Validate .hmod archive
-        run: cargo horizon-mod check target/horizon-mod/horixon.hmod --kind mod
-
-      - name: Upload .hmod artifact
-        uses: actions/upload-artifact@v4
+          python-version: "3.12"
+      - uses: dtolnay/rust-toolchain@master
         with:
-          name: horixon-hmod
-          path: target/horizon-mod/horixon.hmod
+          toolchain: 1.95.0
+          components: rustfmt, clippy
+      - name: Rust formatting
+        run: cargo fmt --all --check
+      - name: Runtime tests
+        run: cargo test --workspace --locked
+      - name: Build deterministic .hnmod
+        run: python3 tools/horizon.py package
+      - name: Validate .hnmod contents
+        run: python3 tools/validate_package.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: horixon-hnmod
+          path: target/horixon-0.4.0.hnmod
           if-no-files-found: error
-
-      - name: Attach .hmod to tagged release
+      - name: Attach .hnmod to tagged release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: target/horizon-mod/horixon.hmod
+          files: target/horixon-0.4.0.hnmod

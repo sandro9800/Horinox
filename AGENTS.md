@@ -1,10 +1,9 @@
 # HORIXON contributor notes
 
-- This repository is a native Horizon `.hmod` source project. Mod identity and SDK pins live only in `horizon-mod.toml`.
-- Use `horizon-mod-api` from `.horizon/sdk/api`; do not add a local clone/path to the game repository.
-- Do not add `rust-toolchain.toml`, `horizon-native.json`, a hand-written `horizon-mixin.toml`, or a `native/` source directory. The Horizon launcher owns the native build environment.
-- Run `cargo horizon-mod check`, `cargo test`, `cargo horizon-mod build`, and `cargo horizon-mod check target/horizon-mod/horixon.hmod --kind mod` before claiming a build passes.
-- Keep GUI input routed through `Widgets` and the public screen hooks. Keep HUD drawing inside `gui_render_post` / public DrawContext APIs.
-- Store player-facing module toggles as registered `SettingSpec`s; persist custom-screen changes with `ClientHost::set_setting`.
-- Native mods execute with the user's permissions. Do not add telemetry, credential access, stealth, persistence outside Horizon's mod settings, or anti-cheat bypasses.
-- If adapting Meteor source, preserve its GPL-3.0 license and all applicable copyright notices. Do not mix copied GPL source into this MIT-licensed code without resolving the license change first.
+- This repository builds a Horizon native source bundle (`.hnmod`) from `mixins/horixon/`.
+- Keep `compatibility.json` and `mixins/horixon/horizon-mixin.toml` pinned to the same Horizon commit.
+- Use `python3 tools/horizon.py package` to create the deterministic `.hnmod`.
+- Before claiming game compatibility, run `python3 tools/horizon.py check --horizon ../horizon` with the exact pinned Horizon checkout and pinned `horizon-mixins` checkout.
+- Run `cargo test --workspace --locked` for the pure Rust runtime tests.
+- Native code runs with the user's operating-system permissions. Never add telemetry, credential access, stealth, persistence outside Horizon's mod settings, or anti-cheat bypasses.
+- If adapting Meteor source, preserve GPL-3.0 and applicable copyright notices; do not mix copied GPL code into this MIT project without resolving licensing first.

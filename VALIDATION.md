@@ -1,20 +1,15 @@
 # Validation status
 
-## Package target
+## Package
 
-HORIXON is now a native Horizon `.hmod` source project for game `26.3`, using mod API contract `0.2` and Horizon SDK commit `0b14f8acfd97fa2c750e42795249dcc981178ca4`.
+The project targets Minecraft Java 26.3. Its native bundle is pinned by `compatibility.json` and `mixins/horixon/horizon-mixin.toml`.
 
-## Required checks
+The package command is `python3 tools/horizon.py package`; it creates a deterministic `.hnmod` source archive. The package validator checks the archive entries, JSON manifest, TOML bundle manifest, identity, version and compatibility pins.
 
-```sh
-cargo horizon-mod check
-cargo test
-cargo horizon-mod build
-cargo horizon-mod check target/horizon-mod/horixon.hmod --kind mod
-```
+## Runtime
 
-The build workflow runs these checks and uploads `target/horizon-mod/horixon.hmod`. The launcher performs the final native compilation against the selected Horizon instance's SDK when the player chooses Build.
+The runtime has unit tests in `mixins/horixon/runtime.rs`. CI runs the workspace tests and validates the `.hnmod` artifact.
 
-## Important distinction
+## Not yet verified
 
-A successful `.hmod` package check validates the manifest, source layout and package. It does not prove that the native library has been compiled by the Horizon launcher or tested in a running game. Those are separate integration checks and must be reported separately.
+A package check does not prove that the mod compiles against a live Horizon checkout or runs in-game. The full `tools/horizon.py check --horizon ../horizon` and an in-game test still need to be run against the exact pinned Horizon revision and a prepared Minecraft 26.3 resource set. Do not treat package validation as an in-game compatibility result.

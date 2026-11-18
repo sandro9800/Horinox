@@ -1,50 +1,56 @@
 # HORIXON
 
-**HORIXON** is a native Rust client mod for Horizon (Minecraft Java 26.3). It ships as an installable `.hmod` package and uses Horizon's public `horizon-mod-api`; it does not require a custom Horizon executable or a Fabric loader.
+**HORIXON** is an experimental native Rust client mod for Horizon / Minecraft Java 26.3. It is distributed as a source-only `.hnmod` bundle. The launcher compiles native code for the selected Horizon instance; this is not a Fabric `.jar` or a content-only `.hmod`.
 
 ## Current features
 
-- Original dark/cyan module manager UI — open with **Right Shift**; close with Escape or Right Shift.
-- Clickable category tabs and module toggles, plus keyboard navigation with Tab, Enter and Space.
-- Persistent module settings, also available under Horizon **Options → Mods**.
-- **ArrayList** — enabled modules in the top-right HUD.
-- **Coordinates** — live XYZ position.
-- **FPS** — client frame-rate counter.
-- **Compass** — eight-way facing direction.
-- **Zoom** — hold **Z** to zoom; scroll while holding to adjust magnification.
-- English and Georgian settings/key translations.
+- Original dark/cyan HORIXON HUD and module-manager overlay.
+- Right Shift opens/closes the menu; Escape closes it.
+- Left/Right switches between Combat, Movement, Render, Player, World and Misc.
+- Up/Down selects a module; Space/Enter toggles it.
+- Render modules currently implemented: **ArrayList**, **Coordinates** and **FPS**.
+- Module states persist in Horizon's native mod-data storage.
+- ArrayList lists enabled modules at the top-right; Coordinates and FPS can be toggled independently.
+- Horizon Options → Mods exposes clickable settings for the Render modules.
 
-The Combat, Movement, Player and World categories are currently scaffolding for subsequent feature ports; they are not falsely advertised as implemented modules.
+The custom overlay is currently keyboard-driven; it does not yet have mouse hit-testing. Combat, Movement, Player, World and Misc are category scaffolding, not finished feature sets. This is a feature-by-feature port, not a claim that all Meteor modules already exist.
 
-## Build the `.hmod`
+## Build the `.hnmod`
 
-Install the `cargo-horizon-mod` tool from the exact SDK build pinned in `horizon-mod.toml`:
+Python 3.11+ is enough to package the source bundle:
 
 ```sh
-cargo install --locked --git https://github.com/horizon-rust/horizon --rev 0b14f8acfd97fa2c750e42795249dcc981178ca4 cargo-horizon-mod
-cargo horizon-mod check
-cargo test
-cargo horizon-mod build
-cargo horizon-mod check target/horizon-mod/horixon.hmod --kind mod
+python3 tools/horizon.py package
 ```
 
-The package is written to `target/horizon-mod/horixon.hmod`. GitHub Actions runs the same checks and uploads the `.hmod` as a build artifact; version tags also attach it to a GitHub release.
+Output: `target/horixon-0.4.0.hnmod`. The packager writes a deterministic archive containing `horizon-native.json` and the `.rs` / `.toml` files in `mixins/horixon/`.
 
-## Install in Horizon
+## Build for a Horizon instance
 
-1. Open Horizon Launcher → your instance → **Mods**.
-2. Choose **Add from GitHub** and enter `https://github.com/sandro9800/Horinox`.
-3. Review the resolved source revision and the native-code warning before trusting it.
-4. Build the installed native mod from the Mods page.
-5. Join a world and press **Right Shift**.
+A native mod is source code and runs with your user permissions. Review the source before trusting it. The `.hnmod` is a source bundle, not a precompiled executable. For a local build with the launcher, extract the archive to a folder and run:
 
-Native mods run with your operating-system user permissions. Read the source before trusting or installing any native mod. HORIXON does not include telemetry, credential collection, stealth, or anti-cheat bypass code.
+```sh
+horizon-launcher native-build path/to/unpacked-horixon --trust-native-code --instance "Your Instance"
+```
 
-## SDK compatibility
+Then prepare and launch that instance. The launcher builds a separate game for the instance; it does not patch your ordinary game installation. Native build support and accepted bundle versions depend on the installed launcher release.
 
-- Game: `26.3`
-- Horizon SDK commit: `0b14f8acfd97fa2c750e42795249dcc981178ca4`
-- Horizon Mixins tool commit: `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`
-- Mod API contract: `0.2`
+## Compatibility pins
 
-The launcher compiles the source package against its pinned SDK when building the instance. The `.hmod` is a source package, not a precompiled executable.
+The bundle was authored against the exact Horizon and `horizon-mixins` commits recorded in `compatibility.json` and `mixins/horixon/horizon-mixin.toml`. Those pins must match. Compatibility with other Nightlies is not claimed until the native check is run against them.
+
+## Development checks
+
+```sh
+cargo test --workspace --locked
+python3 tools/horizon.py package
+python3 tools/validate_package.py
+```
+
+For the full source-compatibility check, clone Horizon and the pinned `horizon-mixins` repository beside this repository, then run:
+
+```sh
+python3 tools/horizon.py check --horizon ../horizon
+```
+
+See `VALIDATION.md` for the checks actually completed. No Minecraft assets or player data are included in this repository.
