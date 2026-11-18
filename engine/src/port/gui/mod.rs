@@ -582,14 +582,15 @@ impl ClickGui {
                 cell,
                 min,
                 max,
-                step,
+                decimal_places,
             } => {
                 let amount = if delta == 0 && activate { 1 } else { delta };
                 if amount != 0 {
                     let current =
                         f64::from_bits(cell.load(std::sync::atomic::Ordering::Relaxed) as u64);
-                    let next = (current + amount as f64 * *step).clamp(*min, *max);
-                    entry.parse(&format!("{next:.3}"));
+                    let step = 10_f64.powi(-(*decimal_places as i32));
+                    let next = (current + amount as f64 * step).clamp(*min, *max);
+                    entry.parse(&format!("{:.*}", *decimal_places as usize, next));
                 }
             }
             Value::Enum { cell, names } if !names.is_empty() => {
@@ -630,11 +631,16 @@ impl ClickGui {
                 let value = *min as f64 + (*max - *min) as f64 * t;
                 entry.parse(&format!("{}", value.round() as i32));
             }
-            Value::Double { min, max, .. } => {
+            Value::Double {
+                min,
+                max,
+                decimal_places,
+                ..
+            } => {
                 let (x, width) = self.slider_rect(module);
                 let t = ((mx - x) / width).clamp(0.0, 1.0);
                 let value = *min + (*max - *min) * t;
-                entry.parse(&format!("{value:.3}"));
+                entry.parse(&format!("{:.*}", *decimal_places as usize, value));
             }
             Value::Enum { cell, names } => {
                 if names.is_empty() {
