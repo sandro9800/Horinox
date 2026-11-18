@@ -14,9 +14,10 @@ This is an experimental native client. It is not a Fabric mod, Java client, or o
 - Up/Down selects modules; Space/Enter toggles them; Escape closes the GUI.
 - Module states persist in Horizon's native mod-data storage.
 - ArrayList renders enabled modules at the top-right; Coordinates and FPS can be hidden independently.
+- Horizon's Options > Mods page exposes clickable toggles for the three Render modules.
 - Empty categories are placeholders until their modules are implemented.
 
-This is an initial module registry, not yet a complete Meteor port. Mouse interaction, a general typed-settings framework, search, and the remaining Meteor feature ports are still unimplemented. Minecraft 26.3 in-game validation has not yet been completed.
+This is an initial module registry, not yet a complete Meteor port. The custom GUI still uses keyboard navigation; pointer-position hit-testing, search, a general typed-settings framework, and the remaining Meteor feature ports are still unimplemented. Minecraft 26.3 in-game validation has not yet been completed.
 
 ## Build requirements
 

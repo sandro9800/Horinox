@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 
 pub const ID: &str = "horixon";
 pub const NAME: &str = "HORIXON";
-pub const VERSION: &str = "0.2.0";
+pub const VERSION: &str = "0.3.0";
 pub const DESCRIPTION: &str = "HORIXON native client and configurable render modules.";
 
 pub const PANEL_BACKGROUND: u32 = 0xD9101420;
@@ -98,6 +98,14 @@ fn set_module_enabled(index: usize, enabled: bool) {
     }
 }
 
+/// Toggle a registered module and return its new state.
+pub fn toggle_module(category: usize, index: usize) -> Option<bool> {
+    if index >= module_count(category) { return None; }
+    let enabled = !module_enabled(category, index);
+    set_module_enabled(index, enabled);
+    Some(enabled)
+}
+
 pub fn coordinates_enabled() -> bool { COORDINATES_ENABLED.load(Ordering::Relaxed) }
 pub fn fps_enabled() -> bool { FPS_ENABLED.load(Ordering::Relaxed) }
 pub fn array_list_enabled() -> bool { ARRAY_LIST_ENABLED.load(Ordering::Relaxed) }
@@ -139,12 +147,8 @@ pub fn handle_key(playing: bool, enabled: bool, key: &str, pressed: bool) -> Opt
             }
         }
         "key.keyboard.space" | "key.keyboard.enter" if menu_is_open() => {
-            let category = selected_category();
-            let index = selected_module();
-            if index < module_count(category) {
-                let enabled = !module_enabled(category, index);
-                set_module_enabled(index, enabled);
-                return Some((module_id(category, index), enabled));
+            if let Some(enabled) = toggle_module(selected_category(), selected_module()) {
+                return Some((module_id(selected_category(), selected_module()), enabled));
             }
         }
         _ => {}
@@ -169,6 +173,7 @@ mod tests {
     fn module_identity_and_categories_are_stable() {
         assert_eq!(ID, "horixon");
         assert_eq!(NAME, "HORIXON");
+        assert_eq!(VERSION, "0.3.0");
         assert_eq!(category_count(), 6);
         assert_eq!(category_name(6), "Combat");
         assert_eq!(module_count(2), 3);
@@ -181,5 +186,14 @@ mod tests {
         assert!(read_bool(None, true));
         assert!(read_bool(Some("true".into()), false));
         assert!(!read_bool(Some("false\n".into()), true));
+    }
+    #[test]
+    fn module_toggle_changes_only_a_valid_render_module() {
+        let before = module_enabled(2, 0);
+        assert_eq!(toggle_module(2, 0), Some(!before));
+        assert_eq!(module_enabled(2, 0), !before);
+        assert_eq!(toggle_module(0, 0), None);
+        assert_eq!(module_enabled(2, 0), !before);
+        set_module_enabled(0, before);
     }
 }
