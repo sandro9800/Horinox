@@ -1,0 +1,15 @@
+[package]
+name = "horixon-engine"
+version = "0.5.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+description = "HORIXON: a Meteor Client port for Horizon with an original Command Center GUI"
+
+[lib]
+name = "horixon_engine"
+path = "src/lib.rs"
+
+[dependencies]
+# The launcher stages Horizon's source and points this at it. For a checkout
+# build, point it at your own Horizon tree (--horizon-client).
+horizon-client = { path = "crates/horizon-client", default-features = false }
