@@ -1,9 +1,10 @@
-// Put testable mod logic here. This file is both the standalone Cargo library
-// and the injected `crate::game::example_mod` module; no generated copy exists.
+// Shared, testable HORIXON runtime logic.
+// This file is both the standalone Cargo library and the injected
+// crate::game::horixon module; no generated copy is maintained.
 
 pub fn block_break_message(pos: [i32; 3]) -> String {
     format!(
-        "[example_mod] Breaking block at {}, {}, {}",
+        "[HORIXON] Block-break hook observed position {}, {}, {}",
         pos[0], pos[1], pos[2]
     )
 }
@@ -20,7 +21,7 @@ mod tests {
     fn message_preserves_signed_block_coordinates() {
         assert_eq!(
             block_break_message([-3, 64, 12]),
-            "[example_mod] Breaking block at -3, 64, 12"
+            "[HORIXON] Block-break hook observed position -3, 64, 12"
         );
     }
 }
