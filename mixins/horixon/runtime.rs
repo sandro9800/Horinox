@@ -1,16 +1,21 @@
-// Shared, testable HORIXON runtime logic.
-// This file is both the standalone Cargo library and the injected
-// crate::game::horixon module; no generated copy is maintained.
+// HORIXON native runtime: shared by Cargo tests and the injected game module.
 
-pub fn block_break_message(pos: [i32; 3]) -> String {
-    format!(
-        "[HORIXON] Block-break hook observed position {}, {}, {}",
-        pos[0], pos[1], pos[2]
-    )
+pub const ID: &str = "horixon";
+pub const NAME: &str = "HORIXON";
+pub const VERSION: &str = "0.1.0";
+pub const DESCRIPTION: &str = "HORIXON native client foundation and HUD.";
+
+pub const PANEL_BACKGROUND: u32 = 0xD9101420;
+pub const PANEL_ACCENT: u32 = 0xFF38BDF8;
+pub const PANEL_TEXT: u32 = 0xFFF1F5F9;
+pub const PANEL_MUTED: u32 = 0xFF94A3B8;
+
+pub fn position_line(x: f64, y: f64, z: f64, dimension: &str) -> String {
+    format!("XYZ  {:.1}  {:.1}  {:.1}  |  {}", x, y, z, dimension)
 }
 
-pub fn before_break(pos: [i32; 3]) {
-    eprintln!("{}", block_break_message(pos));
+pub fn status_line(fps: u32) -> String {
+    format!("NATIVE CLIENT  •  {} FPS", fps)
 }
 
 #[cfg(test)]
@@ -18,10 +23,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn message_preserves_signed_block_coordinates() {
+    fn position_line_keeps_negative_coordinates_and_dimension() {
         assert_eq!(
-            block_break_message([-3, 64, 12]),
-            "[HORIXON] Block-break hook observed position -3, 64, 12"
+            position_line(-12.25, 64.0, 3.5, "minecraft:overworld"),
+            "XYZ  -12.2  64.0  3.5  |  minecraft:overworld"
         );
+    }
+
+    #[test]
+    fn status_line_reports_frame_rate() {
+        assert_eq!(status_line(144), "NATIVE CLIENT  •  144 FPS");
+    }
+
+    #[test]
+    fn module_identity_is_stable() {
+        assert_eq!(ID, "horixon");
+        assert_eq!(NAME, "HORIXON");
     }
 }

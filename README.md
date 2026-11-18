@@ -1,36 +1,30 @@
 # HORIXON
 
-**HORIXON** is a native Rust client project for Horizon, targeting Minecraft Java Edition 26.3. The goal is a faithful, feature-by-feature port of Meteor Client functionality into Horizon's native Rust mixin system, with a completely original HORIXON interface and interaction design.
+**HORIXON** is a native Rust client project for Horizon, targeting Minecraft Java Edition 26.3. Its goal is a feature-by-feature reimplementation of Meteor Client functionality using Horizon's native Rust mixin system, with a completely original interface and visual design.
 
-This repository is an early foundation, not a completed client. The current code is the renamed native Horizon template example: it demonstrates one HEAD hook and a testable Rust runtime. No Meteor source or gameplay modules have been ported yet, and Minecraft 26.3 compatibility has not yet been verified in-game.
+This is an early, experimental native mod. It is not a Fabric mod, Java client, or ordinary `.hmod` content mod. Native code runs with the game's user privileges; only install and build code you have reviewed and trust.
 
-## Project direction
+## Current implementation
 
-- **Native implementation:** Rust code injected through Horizon Mixins. This is not a Fabric mod, Java client, or ordinary .hmod content mod.
-- **Feature parity goal:** reimplement Meteor's module categories and behavior systematically, documenting differences where Horizon's APIs or Minecraft version require them.
-- **Original interface:** HORIXON will have its own GUI, visual language, settings screens, module list, and HUD. It will not copy Meteor's GUI.
-- **Compatibility first:** every feature must be checked against the exact pinned Horizon and mixin revisions before being marked supported.
-- **Transparent status:** planned features are not presented as implemented; compilation alone does not prove in-game behavior.
+- Native HORIXON module registered in Horizon's Mods settings.
+- Original top-left HUD panel showing live FPS and player coordinates/dimension.
+- HUD respects the native mod enable/disable setting and avoids Horizon's occupied debug-screen corner.
+- Unit tests cover HUD text formatting and module identity.
 
-## Current status
-
-| Area | Status |
-|---|---|
-| Native Horizon build scaffold | Present |
-| Pinned Horizon / Horizon Mixins revisions | Present |
-| HORIXON module identity and runtime | Initial rename complete |
-| Original GUI and HUD | Not implemented |
-| Module registry and settings system | Not implemented |
-| Meteor feature port | Not started |
-| In-game validation | Not performed for HORIXON |
+The custom click-driven GUI, module registry/settings framework, and Meteor feature ports are not implemented yet. Minecraft 26.3 is the declared target; in-game validation has not yet been performed.
 
 ## Build requirements
 
-The upstream template currently documents and validates this toolchain: Linux, Rust 1.95.0, Python 3.12+, Git, and Cargo. The staging tools use Linux file locks. Windows and macOS are not validated; on Windows, use WSL2 with a Linux distribution.
+- Linux (the staging tools use Linux file locks)
+- Rust 1.95.0
+- Python 3.12+
+- Git and Cargo
+
+On Windows, use WSL2 with a Linux distribution. Windows and macOS staging are not validated.
 
 ## Build
 
-Clone this repository and the exact upstream source repositories beside it:
+Clone this repository and the pinned upstream sources beside it:
 
 ```sh
 git clone https://github.com/sandro9800/Horinox.git
@@ -38,7 +32,7 @@ git clone https://github.com/horizon-rust/horizon ../horizon
 git clone https://github.com/horizon-rust/horizon-mixins ../horizon-mixins
 ```
 
-The compatible revisions are recorded in compatibility.json. Check out those exact revisions before staging. Then run:
+Use the exact revisions in `compatibility.json`, then run:
 
 ```sh
 cargo fetch --locked
@@ -50,26 +44,25 @@ python3 tools/horizon.py test --horizon ../horizon
 python3 tools/horizon.py build --horizon ../horizon
 ```
 
-See VALIDATION.md for the distinction between automated checks and manual in-game validation.
+The generated output is a custom Horizon executable. Native mod code is not sandboxed; review every change before trusting/building it.
 
 ## Architecture
 
-- mixins/horixon/horizon-mixin.toml declares the native module and its hooks.
-- mixins/horixon/runtime.rs contains the shared, independently testable runtime logic.
-- mixins/horixon/break.rs adapts the runtime to the pinned Horizon game hook.
-- tools/horizon.py stages the pinned upstream source and invokes the Horizon Mixins plan/apply/build pipeline.
-- tools/audit/ verifies that generated AST changes match the declared mixin plan.
+- `mixins/horixon/`: native hook helpers, manifest, and shared runtime.
+- `compatibility.json`: exact Horizon source revision, source hash, native hook API, and mixin schema.
+- `tools/horizon.py`: stages the pinned Horizon source and runs the Horizon Mixins plan/apply/build pipeline.
+- `tools/audit/`: audits generated AST changes against the declared mixin plan.
 
-All native AST changes must go through Horizon Mixins' plan/apply flow. Do not rewrite Horizon source with string substitutions or edit the upstream checkout.
+All native source changes must go through Horizon Mixins' plan/apply flow. Do not patch the upstream Horizon checkout directly.
 
 ## Roadmap
 
-1. Establish a clean native HORIXON module and reproducible validation.
-2. Inspect the pinned Horizon APIs and design the original GUI/HUD integration.
-3. Build the event, module registry, settings, and configuration foundations.
-4. Port Meteor functionality in small, testable groups, preserving feature behavior where the target APIs permit it.
-5. Validate each feature in-game on the supported Minecraft/Horizon build and publish an explicit compatibility matrix.
+1. Native module and HUD foundation.
+2. Original click-driven GUI, category navigation, search, and settings controls.
+3. Event bus, module registry, typed settings, and persistent configuration.
+4. Feature-by-feature Meteor behavior reimplementation, with explicit compatibility notes.
+5. Automated and in-game validation for each supported feature.
 
-## Licensing and attribution
+## Licensing
 
-The current scaffold is based on the MIT-licensed Horizon native mod template and retains its upstream notices. No Meteor source has been copied into this repository at this stage. Any future adaptation of Meteor source must preserve its GPL-3.0 license and notices; the repository's licensing and third-party notices will be updated before such code is introduced. See LICENSE.
+The initial scaffold comes from the MIT-licensed Horizon native mod template and retains its upstream notices. No Meteor source has been copied into this repository. Any future adaptation of Meteor source must preserve its GPL-3.0 license and notices.
