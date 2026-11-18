@@ -35,7 +35,10 @@ pub fn status_line(fps: u32) -> String {
 }
 
 pub fn load_settings(array_list: Option<String>, coordinates: Option<String>, fps: Option<String>) {
-    if SETTINGS_LOADED.compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire).is_err() {
+    if SETTINGS_LOADED
+        .compare_exchange(false, true, Ordering::AcqRel, Ordering::Acquire)
+        .is_err()
+    {
         return;
     }
     ARRAY_LIST_ENABLED.store(read_bool(array_list, true), Ordering::Relaxed);
@@ -68,19 +71,33 @@ pub fn category_count() -> usize {
 }
 
 pub fn module_count(category: usize) -> usize {
-    if category == 2 { RENDER_MODULES.len() } else { 0 }
+    if category == 2 {
+        RENDER_MODULES.len()
+    } else {
+        0
+    }
 }
 
 pub fn module_name(category: usize, index: usize) -> &'static str {
-    if category == 2 { RENDER_MODULES[index % RENDER_MODULES.len()].1 } else { "" }
+    if category == 2 {
+        RENDER_MODULES[index % RENDER_MODULES.len()].1
+    } else {
+        ""
+    }
 }
 
 pub fn module_id(category: usize, index: usize) -> &'static str {
-    if category == 2 { RENDER_MODULES[index % RENDER_MODULES.len()].0 } else { "" }
+    if category == 2 {
+        RENDER_MODULES[index % RENDER_MODULES.len()].0
+    } else {
+        ""
+    }
 }
 
 pub fn module_enabled(category: usize, index: usize) -> bool {
-    if category != 2 { return false; }
+    if category != 2 {
+        return false;
+    }
     match index {
         0 => ARRAY_LIST_ENABLED.load(Ordering::Relaxed),
         1 => COORDINATES_ENABLED.load(Ordering::Relaxed),
@@ -100,50 +117,79 @@ fn set_module_enabled(index: usize, enabled: bool) {
 
 /// Toggle a registered module and return its new state.
 pub fn toggle_module(category: usize, index: usize) -> Option<bool> {
-    if index >= module_count(category) { return None; }
+    if index >= module_count(category) {
+        return None;
+    }
     let enabled = !module_enabled(category, index);
     set_module_enabled(index, enabled);
     Some(enabled)
 }
 
-pub fn coordinates_enabled() -> bool { COORDINATES_ENABLED.load(Ordering::Relaxed) }
-pub fn fps_enabled() -> bool { FPS_ENABLED.load(Ordering::Relaxed) }
-pub fn array_list_enabled() -> bool { ARRAY_LIST_ENABLED.load(Ordering::Relaxed) }
+pub fn coordinates_enabled() -> bool {
+    COORDINATES_ENABLED.load(Ordering::Relaxed)
+}
+pub fn fps_enabled() -> bool {
+    FPS_ENABLED.load(Ordering::Relaxed)
+}
+pub fn array_list_enabled() -> bool {
+    ARRAY_LIST_ENABLED.load(Ordering::Relaxed)
+}
 
 /// Returns the changed module id and new state so the caller can persist it.
-pub fn handle_key(playing: bool, enabled: bool, key: &str, pressed: bool) -> Option<(&'static str, bool)> {
-    if !enabled || !pressed { return None; }
+pub fn handle_key(
+    playing: bool,
+    enabled: bool,
+    key: &str,
+    pressed: bool,
+) -> Option<(&'static str, bool)> {
+    if !enabled || !pressed {
+        return None;
+    }
     if key == "key.keyboard.escape" {
         MENU_OPEN.store(false, Ordering::Relaxed);
         return None;
     }
-    if !playing { return None; }
+    if !playing {
+        return None;
+    }
     match key {
         "key.keyboard.right.shift" => {
             MENU_OPEN.fetch_xor(true, Ordering::Relaxed);
         }
         "key.keyboard.left" if menu_is_open() => {
-            SELECTED_CATEGORY.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i|
-                Some((i + CATEGORIES.len() - 1) % CATEGORIES.len())).ok();
+            SELECTED_CATEGORY
+                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
+                    Some((i + CATEGORIES.len() - 1) % CATEGORIES.len())
+                })
+                .ok();
             SELECTED_MODULE.store(0, Ordering::Relaxed);
         }
         "key.keyboard.right" if menu_is_open() => {
-            SELECTED_CATEGORY.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i|
-                Some((i + 1) % CATEGORIES.len())).ok();
+            SELECTED_CATEGORY
+                .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
+                    Some((i + 1) % CATEGORIES.len())
+                })
+                .ok();
             SELECTED_MODULE.store(0, Ordering::Relaxed);
         }
         "key.keyboard.up" if menu_is_open() => {
             let count = module_count(selected_category());
             if count > 0 {
-                SELECTED_MODULE.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i|
-                    Some((i + count - 1) % count)).ok();
+                SELECTED_MODULE
+                    .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
+                        Some((i + count - 1) % count)
+                    })
+                    .ok();
             }
         }
         "key.keyboard.down" if menu_is_open() => {
             let count = module_count(selected_category());
             if count > 0 {
-                SELECTED_MODULE.fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i|
-                    Some((i + 1) % count)).ok();
+                SELECTED_MODULE
+                    .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |i| {
+                        Some((i + 1) % count)
+                    })
+                    .ok();
             }
         }
         "key.keyboard.space" | "key.keyboard.enter" if menu_is_open() => {
@@ -162,8 +208,10 @@ mod tests {
 
     #[test]
     fn position_line_keeps_negative_coordinates_and_dimension() {
-        assert_eq!(position_line(-12.25, 64.0, 3.5, "minecraft:overworld"),
-            "XYZ  -12.2  64.0  3.5  |  minecraft:overworld");
+        assert_eq!(
+            position_line(-12.25, 64.0, 3.5, "minecraft:overworld"),
+            "XYZ  -12.2  64.0  3.5  |  minecraft:overworld"
+        );
     }
     #[test]
     fn status_line_reports_frame_rate() {

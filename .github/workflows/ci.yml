@@ -26,6 +26,8 @@ jobs:
         run: cargo fmt --all --check
       - name: Runtime tests
         run: cargo test --workspace --locked
+      - name: Clippy
+        run: cargo clippy --workspace --all-targets --locked -- -D warnings
       - name: Build deterministic .hnmod
         run: python3 tools/horizon.py package
       - name: Validate .hnmod contents

@@ -1,15 +1,14 @@
 # Validation status
 
-## Package
+## Completed checks (2026-11-19)
 
-The project targets Minecraft Java 26.3. Its native bundle is pinned by `compatibility.json` and `mixins/horixon/horizon-mixin.toml`.
-
-The package command is `python3 tools/horizon.py package`; it creates a deterministic `.hnmod` source archive. The package validator checks the archive entries, JSON manifest, TOML bundle manifest, identity, version and compatibility pins.
-
-## Runtime
-
-The runtime has unit tests in `mixins/horixon/runtime.rs`. CI runs the workspace tests and validates the `.hnmod` artifact.
+- `cargo fmt --all --check` — passed.
+- `cargo test --workspace --locked` — passed, 5 tests.
+- `cargo clippy --workspace --all-targets --locked -- -D warnings` — passed.
+- `python3 tools/horizon.py package` — generated `target/horixon-0.4.0.hnmod` (6,125 bytes).
+- `python3 tools/validate_package.py` — passed; 8 archive entries, valid JSON/TOML, matching mod identity and compatibility pins.
+- Package SHA-256: `30a93b324a6c8e3d3bf8ab6e8ada663fde671361d14a2ee7162bcf2de5f209ff`.
 
 ## Not yet verified
 
-A package check does not prove that the mod compiles against a live Horizon checkout or runs in-game. The full `tools/horizon.py check --horizon ../horizon` and an in-game test still need to be run against the exact pinned Horizon revision and a prepared Minecraft 26.3 resource set. Do not treat package validation as an in-game compatibility result.
+The full `python3 tools/horizon.py check --horizon ../horizon` against the pinned Horizon and `horizon-mixins` checkouts has not yet completed. In-game behaviour also remains unverified; it requires the Horizon launcher, a trusted native build, and prepared Minecraft 26.3 resources. A valid `.hnmod` archive and passing runtime unit tests do not prove an in-game build.
