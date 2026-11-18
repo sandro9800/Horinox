@@ -1,26 +1,51 @@
-name: Native mod template
+name: Build HORIXON .hmod
+
 on:
   push:
+    branches: [main]
+    tags: ["v*"]
   pull_request:
+  workflow_dispatch:
+
 permissions:
-  contents: read
+  contents: write
+
 jobs:
-  fixture:
+  build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install pinned Rust
-        run: rustup toolchain install 1.95.0 --profile minimal --component rustfmt --component clippy
-      - name: Check out pinned mixin transformer
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install the pinned Rust toolchain
         run: |
-          git clone https://github.com/horizon-rust/horizon-mixins ../horizon-mixins
-          git -C ../horizon-mixins checkout "$(python3 -c 'import json; print(json.load(open("compatibility.json"))["horizon_mixins_revision"])')"
-          cargo fetch --locked --manifest-path ../horizon-mixins/Cargo.toml
-      - run: cargo fetch --locked
-      - run: cargo fmt --all --check
-      - run: cargo clippy --workspace --all-targets --locked --offline -- -D warnings
-      - run: cargo test --workspace --locked --offline
-      - run: python3 tools/test_template.py
+          rustup toolchain install 1.99.1 --profile minimal
+          rustup default 1.99.1
+
+      - name: Install cargo-horizon-mod from the pinned SDK
+        run: cargo install --locked --git https://github.com/horizon-rust/horizon --rev 0b14f8acfd97fa2c750e42795249dcc981178ca4 cargo-horizon-mod
+
+      - name: Check mod API and package layout
+        run: cargo horizon-mod check
+
+      - name: Run HORIXON tests
+        run: cargo test
+
+      - name: Build .hmod package
+        run: cargo horizon-mod build
+
+      - name: Validate .hmod archive
+        run: cargo horizon-mod check target/horizon-mod/horixon.hmod --kind mod
+
+      - name: Upload .hmod artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: horixon-hmod
+          path: target/horizon-mod/horixon.hmod
+          if-no-files-found: error
+
+      - name: Attach .hmod to tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/horizon-mod/horixon.hmod

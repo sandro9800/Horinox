@@ -1,56 +1,50 @@
 # HORIXON
 
-**HORIXON** is a native Rust client project for Horizon, targeting Minecraft Java Edition 26.3. Its goal is a feature-by-feature reimplementation of Meteor Client functionality using Horizon's native Rust mixin system, with a completely original interface and visual design.
+**HORIXON** is a native Rust client mod for Horizon (Minecraft Java 26.3). It ships as an installable `.hmod` package and uses Horizon's public `horizon-mod-api`; it does not require a custom Horizon executable or a Fabric loader.
 
-This is an experimental native client. It is not a Fabric mod, Java client, or ordinary `.hmod` content mod. Native code runs with the game's user privileges; review every change before building or trusting it.
+## Current features
 
-## Current implementation
+- Original dark/cyan module manager UI — open with **Right Shift**; close with Escape or Right Shift.
+- Clickable category tabs and module toggles, plus keyboard navigation with Tab, Enter and Space.
+- Persistent module settings, also available under Horizon **Options → Mods**.
+- **ArrayList** — enabled modules in the top-right HUD.
+- **Coordinates** — live XYZ position.
+- **FPS** — client frame-rate counter.
+- **Compass** — eight-way facing direction.
+- **Zoom** — hold **Z** to zoom; scroll while holding to adjust magnification.
+- English and Georgian settings/key translations.
 
-- Native HORIXON module registered in Horizon's Mods settings.
-- Original top-left HUD with live FPS and player coordinates/dimension.
-- Keyboard-driven GUI opened/closed with Right Shift.
-- Six categories: Combat, Movement, Render, Player, World, Misc.
-- First working Render category: ArrayList, Coordinates, and FPS.
-- Up/Down selects modules; Space/Enter toggles them; Escape closes the GUI.
-- Module states persist in Horizon's native mod-data storage.
-- ArrayList renders enabled modules at the top-right; Coordinates and FPS can be hidden independently.
-- Horizon's Options > Mods page exposes clickable toggles for the three Render modules.
-- Empty categories are placeholders until their modules are implemented.
+The Combat, Movement, Player and World categories are currently scaffolding for subsequent feature ports; they are not falsely advertised as implemented modules.
 
-This is an initial module registry, not yet a complete Meteor port. The custom GUI still uses keyboard navigation; pointer-position hit-testing, search, a general typed-settings framework, and the remaining Meteor feature ports are still unimplemented. Minecraft 26.3 in-game validation has not yet been completed.
+## Build the `.hmod`
 
-## Build requirements
-
-- Linux (the staging tools use Linux file locks).
-- Rust 1.95.0.
-- Python 3.12+.
-- Git and Cargo.
-
-On Windows, use WSL2 with a Linux distribution. Windows and macOS staging are not validated.
-
-## Build
-
-Clone this repository and the pinned upstream sources beside it:
+Install the `cargo-horizon-mod` tool from the exact SDK build pinned in `horizon-mod.toml`:
 
 ```sh
-git clone https://github.com/sandro9800/Horinox.git
-git clone https://github.com/horizon-rust/horizon.git ../horizon
-git clone https://github.com/horizon-rust/horizon-mixins.git ../horizon-mixins
+cargo install --locked --git https://github.com/horizon-rust/horizon --rev 0b14f8acfd97fa2c750e42795249dcc981178ca4 cargo-horizon-mod
+cargo horizon-mod check
+cargo test
+cargo horizon-mod build
+cargo horizon-mod check target/horizon-mod/horixon.hmod --kind mod
 ```
 
-Use the exact revisions in `compatibility.json`, then run:
+The package is written to `target/horizon-mod/horixon.hmod`. GitHub Actions runs the same checks and uploads the `.hmod` as a build artifact; version tags also attach it to a GitHub release.
 
-```sh
-cargo fetch --locked
-cargo test --workspace --locked --offline
-python3 tools/horizon.py stage --horizon ../horizon
-python3 tools/horizon.py check --horizon ../horizon
-python3 tools/horizon.py test --horizon ../horizon
-python3 tools/horizon.py build --horizon ../horizon
-```
+## Install in Horizon
 
-The generated output is a custom Horizon executable. Native mod code is not sandboxed.
+1. Open Horizon Launcher → your instance → **Mods**.
+2. Choose **Add from GitHub** and enter `https://github.com/sandro9800/Horinox`.
+3. Review the resolved source revision and the native-code warning before trusting it.
+4. Build the installed native mod from the Mods page.
+5. Join a world and press **Right Shift**.
 
-## Licensing
+Native mods run with your operating-system user permissions. Read the source before trusting or installing any native mod. HORIXON does not include telemetry, credential collection, stealth, or anti-cheat bypass code.
 
-The initial scaffold comes from the MIT-licensed Horizon native mod template and retains its upstream notices. No Meteor source has been copied into this repository. Any future adaptation of Meteor source must preserve its GPL-3.0 license and notices.
+## SDK compatibility
+
+- Game: `26.3`
+- Horizon SDK commit: `0b14f8acfd97fa2c750e42795249dcc981178ca4`
+- Horizon Mixins tool commit: `e59da9094f0c2fdda6c627fe9eff22dec6a906f0`
+- Mod API contract: `0.2`
+
+The launcher compiles the source package against its pinned SDK when building the instance. The `.hmod` is a source package, not a precompiled executable.

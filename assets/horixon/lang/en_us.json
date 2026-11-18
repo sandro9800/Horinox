@@ -1,0 +1,20 @@
+{
+  "key.horixon.menu": "Open HORIXON menu",
+  "key.horixon.zoom": "Zoom",
+  "setting.horixon.array_list": "ArrayList",
+  "setting.horixon.array_list.tooltip": "Show enabled modules in the top-right HUD.",
+  "setting.horixon.coordinates": "Coordinates",
+  "setting.horixon.coordinates.tooltip": "Show your current XYZ position.",
+  "setting.horixon.fps": "FPS",
+  "setting.horixon.fps.tooltip": "Show the current client frame rate.",
+  "setting.horixon.compass": "Compass",
+  "setting.horixon.compass.tooltip": "Show the direction you are facing.",
+  "setting.horixon.zoom": "Zoom",
+  "setting.horixon.zoom.tooltip": "Enable the hold-to-zoom module.",
+  "setting.horixon.zoom_level": "Zoom level",
+  "setting.horixon.zoom_level.tooltip": "Starting magnification while holding the Zoom key.",
+  "setting.horixon.zoom_smooth": "Smooth zoom",
+  "setting.horixon.zoom_smooth.tooltip": "Animate zoom transitions.",
+  "setting.horixon.zoom_sensitivity": "Reduced sensitivity",
+  "setting.horixon.zoom_sensitivity.tooltip": "Reduce mouse sensitivity in proportion to the zoom factor."
+}

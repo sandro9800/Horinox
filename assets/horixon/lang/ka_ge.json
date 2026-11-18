@@ -1,0 +1,20 @@
+{
+  "key.horixon.menu": "HORIXON მენიუს გახსნა",
+  "key.horixon.zoom": "მიახლოება",
+  "setting.horixon.array_list": "მოდულების სია",
+  "setting.horixon.array_list.tooltip": "აქტიური მოდულების ჩვენება ზედა მარჯვენა კუთხეში.",
+  "setting.horixon.coordinates": "კოორდინატები",
+  "setting.horixon.coordinates.tooltip": "მიმდინარე XYZ კოორდინატების ჩვენება.",
+  "setting.horixon.fps": "FPS",
+  "setting.horixon.fps.tooltip": "თამაშის კადრების სიხშირის ჩვენება.",
+  "setting.horixon.compass": "კომპასი",
+  "setting.horixon.compass.tooltip": "მიმართულების ჩვენება.",
+  "setting.horixon.zoom": "მიახლოება",
+  "setting.horixon.zoom.tooltip": "ღილაკზე დაჭერით მიახლოების მოდულის ჩართვა.",
+  "setting.horixon.zoom_level": "მიახლოების დონე",
+  "setting.horixon.zoom_level.tooltip": "Zoom ღილაკის დაჭერისას საწყისი მასშტაბი.",
+  "setting.horixon.zoom_smooth": "გლუვი მიახლოება",
+  "setting.horixon.zoom_smooth.tooltip": "მიახლოების ანიმაცია.",
+  "setting.horixon.zoom_sensitivity": "შემცირებული მგრძნობელობა",
+  "setting.horixon.zoom_sensitivity.tooltip": "მიახლოებისას მაუსის მგრძნობელობის პროპორციული შემცირება."
+}
