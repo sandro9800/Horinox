@@ -7,7 +7,7 @@ pub mod horizon_api_shim;
 pub mod meteor_core;
 pub mod port;
 
-//! Horizon hook routing for HORIXON's native ClickGUI and in-game modules.
+// Horizon hook routing for HORIXON's native ClickGUI and in-game modules.
 
 use std::sync::Mutex;
 
