@@ -231,7 +231,6 @@ impl Hooks for HorixonHooks {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
     #[test]
