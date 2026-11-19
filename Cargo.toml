@@ -1,0 +1,9 @@
+[package]
+name = "mod-horixon"
+version = "0.5.0"
+edition = "2024"
+license = "GPL-3.0-or-later"
+description = "HORIXON: a Meteor-derived Horizon mod with an original Command Center GUI"
+
+[dependencies]
+horizon-mod-api = { path = ".horizon/sdk/api/crates/horizon-mod-api" }

@@ -1,4 +1,5 @@
-name: Build HORIXON .hnmod
+name: Build HORIXON .hmod
+
 
 on:
   push:
@@ -13,91 +14,32 @@ permissions:
 jobs:
   package:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt
-      - name: Check Rust formatting
-        run: find engine/src -name '*.rs' -print0 | xargs -0 -n1 rustfmt --edition 2021 --check
-      - name: Build .hnmod source bundle
-        run: python tools/pack_bundle.py
-      - name: Validate .hnmod bundle
-        run: python tools/validate_bundle.py
-      - uses: actions/upload-artifact@v4
-        with:
-          name: horixon-hnmod
-          path: target/horixon-0.5.0.hnmod
-          if-no-files-found: error
-      - name: Attach .hnmod to tagged release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: target/horixon-0.5.0.hnmod
-
-  native-check:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
-      - name: Install pinned Rust toolchain
-        run: |
-          rustup toolchain install 1.99.1 --profile minimal
-          rustup default 1.99.1
-      - name: Cache Cargo registry and target
-        uses: actions/cache@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            ${{ runner.temp }}/horizon-target
-          key: ${{ runner.os }}-horizon-9f42064-horixon-${{ hashFiles('engine/Cargo.toml') }}
-      - name: Download pinned Horizon source
-        run: |
-          curl --fail --location --retry 3 https://codeload.github.com/horizon-rust/horizon/tar.gz/9f42064c11efe7ef3e5ed2baad7ddc2a3b36eea0 -o "${{ runner.temp }}/horizon.tar.gz"
-          mkdir -p "${{ runner.temp }}/horizon"
-          tar -xzf "${{ runner.temp }}/horizon.tar.gz" -C "${{ runner.temp }}/horizon" --strip-components=1
-      - name: Stage HORIXON in the pinned Horizon workspace
-        env:
-          HORIZON_ROOT: ${{ runner.temp }}/horizon
-        run: |
-          mkdir -p "$HORIZON_ROOT/crates/horixon-engine"
-          cp -R engine/. "$HORIZON_ROOT/crates/horixon-engine/"
-          python3 - <<'PY'
-          import fnmatch, os, tomllib
-          from pathlib import Path
-          root = Path(os.environ["HORIZON_ROOT"])
-          engine = root / "crates/horixon-engine/Cargo.toml"
-          engine.write_text(engine.read_text().replace('path = "crates/horizon-client"', 'path = "../horizon-client"'))
-          manifest = root / "Cargo.toml"
-          source = manifest.read_text()
-          workspace = tomllib.loads(source).get("workspace", {})
-          members = workspace.get("members", [])
-          target = "crates/horixon-engine"
-          if not any(fnmatch.fnmatchcase(target, member) for member in members):
-              start = source.index("members = [")
-              opening = source.index("[", start)
-              depth = 0
-              closing = None
-              for index in range(opening, len(source)):
-                  if source[index] == "[": depth += 1
-                  elif source[index] == "]":
-                      depth -= 1
-                      if depth == 0:
-                          closing = index
-                          break
-              if closing is None: raise SystemExit("Could not locate workspace members array")
-              source = source[:closing] + '    "crates/horixon-engine",' + chr(10) + source[closing:]
-              manifest.write_text(source)
-          PY
-      - name: Compile HORIXON against the pinned Horizon native API
-        working-directory: ${{ runner.temp }}/horizon
-        env:
-          CARGO_BUILD_JOBS: 2
-          CARGO_INCREMENTAL: 0
-          CARGO_TARGET_DIR: ${{ runner.temp }}/horizon-target
-        run: cargo check -p horixon-engine
+          targets: wasm32-unknown-unknown
+          components: rustfmt
+      - name: Check Rust formatting
+        run: cargo fmt --all -- --check
+      - name: Install official Horizon mod builder (pinned SDK build)
+        run: cargo install --git https://github.com/horizon-rust/horizon.git --rev dd67b76ff23e28c6d8e21859df600d31572f81a0 --locked cargo-horizon-mod
+      - name: Check native and wasm API compatibility
+        run: cargo horizon-mod check --uses
+      - name: Build official .hmod package
+        run: cargo horizon-mod build
+      - name: Validate flat .hmod archive
+        run: python3 tools/validate_hmod.py target/horizon-mod/horixon.hmod
+      - name: Official package check
+        run: cargo horizon-mod check target/horizon-mod/horixon.hmod
+      - uses: actions/upload-artifact@v4
+        with:
+          name: horixon-hmod
+          path: target/horizon-mod/horixon.hmod
+          if-no-files-found: error
+      - name: Attach .hmod to tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/horizon-mod/horixon.hmod

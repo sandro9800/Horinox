@@ -1,0 +1,13 @@
+id = "horixon"
+name = "HORIXON"
+version = "0.5.0"
+description = "A Meteor-derived client mod with an original HORIXON Command Center GUI"
+authors = ["Sandro"]
+api = "0.2"
+side = "both"
+capabilities = ["registries"]
+
+[native]
+game = "26.3"
+horizon = "dd67b76ff23e28c6d8e21859df600d31572f81a0"
+mixins = "e59da9094f0c2fdda6c627fe9eff22dec6a906f0"

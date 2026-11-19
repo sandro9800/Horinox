@@ -1,5 +1,2 @@
-/target/
-*.hnmod
-.horizon/
-__pycache__/
-*.pyc
+/target
+/.horizon
