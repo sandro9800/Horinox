@@ -22,7 +22,7 @@ def main() -> int:
     assert manifest["api"] == "0.2" and manifest["side"] == "client"
     assert manifest["native"]["game"] == "26.3"
     assert manifest["native"]["horizon"] == HORIZON
-    assert manifest["native"]["mixins"] == MIXINS and manifest["capabilities"] == []
+    assert manifest["native"]["mixins"] == MIXINS and manifest["capabilities"] == ["registries"]
     assert cargo["package"]["name"] == "mod-horixon" and cargo["package"]["version"] == manifest["version"]
     assert cargo["package"]["license"] == "GPL-3.0-or-later"
     assert archive.is_file(), f"Missing archive: {archive}"
