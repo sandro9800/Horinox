@@ -19,9 +19,10 @@ def main() -> int:
     manifest = tomllib.loads((ROOT / "horizon-mod.toml").read_text())
     cargo = tomllib.loads((ROOT / "Cargo.toml").read_text())
     assert manifest["id"] == "horixon" and manifest["version"] == "0.5.0"
-    assert manifest["api"] == "0.2" and manifest["side"] == "both"
+    assert manifest["api"] == "0.2" and manifest["side"] == "client"
     assert manifest["native"]["game"] == "26.3"
-    assert manifest["native"]["horizon"] == HORIZON and manifest["native"]["mixins"] == MIXINS
+    assert manifest["native"]["horizon"] == HORIZON
+    assert manifest["native"]["mixins"] == MIXINS and manifest["capabilities"] == []
     assert cargo["package"]["name"] == "mod-horixon" and cargo["package"]["version"] == manifest["version"]
     assert cargo["package"]["license"] == "GPL-3.0-or-later"
     assert archive.is_file(), f"Missing archive: {archive}"

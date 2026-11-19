@@ -4,8 +4,8 @@ version = "0.5.0"
 description = "A Meteor-derived client mod with an original HORIXON Command Center GUI"
 authors = ["Sandro"]
 api = "0.2"
-side = "both"
-capabilities = ["registries"]
+side = "client"
+capabilities = []
 
 [native]
 game = "26.3"
