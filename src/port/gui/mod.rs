@@ -199,6 +199,16 @@ impl ClickGui {
             return false;
         }
         match key {
+            256 if self.search_focused => {
+                if self.search.is_empty() {
+                    self.search_focused = false;
+                } else {
+                    self.search.clear();
+                    self.module_scroll = 0.0;
+                    self.ensure_selected(shared);
+                }
+                return true;
+            }
             256 | 344 => {
                 self.close();
                 return true;
