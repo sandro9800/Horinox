@@ -12,7 +12,7 @@ pub mod port;
 use std::sync::Mutex;
 
 use crate::horizon_api_shim::mod_api::{
-    ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks, ClientHost, InputKeyEvent,
+    ClientHost, ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks, InputKeyEvent,
     ScreenCharTypedPreEvent, ScreenKeyPressedPreEvent, ScreenMouseButtonPressedPreEvent,
     ScreenMouseButtonReleasedPreEvent, ScreenMouseDraggedPreEvent, ScreenMouseScrolledPreEvent,
     ScreenRenderPostEvent,
@@ -96,7 +96,6 @@ impl Hooks for HorixonHooks {
         }
         queue.flush_to_hud(host);
     }
-
 
     fn input_key(&self, host: &mut dyn ClientHost, event: &mut InputKeyEvent<'_>) {
         if host.mod_screen().is_some() || host.player().is_none() {
