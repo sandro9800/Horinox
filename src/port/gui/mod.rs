@@ -141,6 +141,19 @@ impl ClickGui {
         self.selected = Some(items[next].1);
         self.selected_setting = 0;
         self.settings_scroll = 0.0;
+        self.reveal_module_index(next);
+    }
+
+    fn reveal_module_index(&mut self, index: usize) {
+        let row_height = 34.0 * self.scale;
+        let row_top = index as f64 * row_height;
+        let row_bottom = row_top + row_height;
+        if row_top < self.module_scroll {
+            self.module_scroll = row_top;
+        } else if row_bottom > self.module_scroll + self.module_list.h {
+            self.module_scroll = row_bottom - self.module_list.h;
+        }
+        self.module_scroll = self.module_scroll.clamp(0.0, self.module_scroll_max);
     }
 
     pub fn change_category(&mut self, delta: i32, shared: &Shared) {
