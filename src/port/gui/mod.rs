@@ -223,12 +223,12 @@ impl ClickGui {
                 self.search_focused = false;
                 return true;
             }
-            72 => {
+            72 if !self.search_focused => {
                 self.hud_editor = !self.hud_editor;
                 self.dragging_hud = None;
                 return true;
             }
-            258 => {
+            258 if !self.search_focused => {
                 self.toggle_settings_of_selected();
                 return true;
             }
