@@ -56,6 +56,7 @@ pub struct ClickGui {
     settings_scroll_max: f64,
     scale: f64,
     hud_editor: bool,
+    selected_hud: Option<usize>,
     dragging_hud: Option<usize>,
     last_drag_mouse: (f64, f64),
 }
@@ -84,6 +85,7 @@ impl ClickGui {
             settings_scroll_max: 0.0,
             scale: 1.0,
             hud_editor: false,
+            selected_hud: None,
             dragging_hud: None,
             last_drag_mouse: (0.0, 0.0),
         }
@@ -102,6 +104,7 @@ impl ClickGui {
         self.open = false;
         self.search_focused = false;
         self.hud_editor = false;
+        self.selected_hud = None;
         self.dragging_hud = None;
     }
 
@@ -225,6 +228,7 @@ impl ClickGui {
             }
             72 if !self.search_focused => {
                 self.hud_editor = !self.hud_editor;
+                self.selected_hud = None;
                 self.dragging_hud = None;
                 return true;
             }
@@ -309,7 +313,8 @@ impl ClickGui {
         let (mx, my) = self.mouse;
         if self.hud_editor {
             if button == 0 {
-                self.dragging_hud = self.hud_element_at(shared, mx, my);
+                self.selected_hud = self.hud_element_at(shared, mx, my);
+                self.dragging_hud = self.selected_hud;
                 self.last_drag_mouse = self.mouse;
             }
             return true;
@@ -1003,7 +1008,7 @@ impl ClickGui {
 
     fn draw_hud_editor(&self, shared: &Shared, emit: &mut impl FnMut(UiDraw)) {
         let s = self.scale;
-        for element in &shared.hud.elements {
+        for (index, element) in shared.hud.elements.iter().enumerate() {
             let (x, y) = element.render_pos();
             let rect = Rect {
                 x: x as f64,
@@ -1011,15 +1016,23 @@ impl ClickGui {
                 w: element.width() as f64,
                 h: element.height() as f64,
             };
-            emit(UiDraw::Outline(
-                rect,
-                if element.is_active() { GREEN } else { MUTED },
-            ));
+            let color = if self.selected_hud == Some(index) {
+                GREEN
+            } else if element.is_active() {
+                0xFF60A5FA
+            } else {
+                MUTED
+            };
+            emit(UiDraw::Outline(rect, color));
             emit(UiDraw::Text(
                 x as f64 + 2.0 * s,
                 y as f64 - 12.0 * s,
-                element.info().title.to_string(),
-                if element.is_active() { GREEN } else { MUTED },
+                if self.selected_hud == Some(index) {
+                    format!("{}  [SELECTED]", element.info().title)
+                } else {
+                    element.info().title.to_string()
+                },
+                color,
             ));
         }
         emit(UiDraw::Text(
@@ -1036,6 +1049,7 @@ impl ClickGui {
             .elements
             .iter()
             .enumerate()
+            .rev()
             .find_map(|(index, element)| {
                 let (ex, ey) = element.render_pos();
                 let rect = Rect {
