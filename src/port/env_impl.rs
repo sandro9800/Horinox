@@ -163,8 +163,7 @@ impl DrawQueue {
                 _ => {}
             }
         }
-        if !_draws.is_empty() {
-        }
+        if !_draws.is_empty() {}
     }
 
 }
