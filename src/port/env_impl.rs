@@ -4,9 +4,7 @@
 //! pending side effects, and the `Host` the hook was given. Everything a module
 //! can ask the game for is one call away in `PORT-MAP.md`'s mapping table.
 
-use crate::horizon_api_shim::mod_api::{
-    GuiDraw, ClientHost, Text,
-};
+use crate::horizon_api_shim::mod_api::{ClientHost, GuiDraw, Text};
 use crate::meteor_core::env::{
     Action, BlockInfo, ClickMode, EntityInfo, Env, GameMode, Hand, InvSlot, ItemStackInfo,
     LogLevel, PacketInfo, PlayerInfo, Raycast, Renderer, Screen, WorldInfo,
@@ -165,7 +163,6 @@ impl DrawQueue {
         }
         if !_draws.is_empty() {}
     }
-
 }
 
 impl Renderer for DrawQueue {
