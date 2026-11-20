@@ -12,8 +12,8 @@ pub mod port;
 use std::sync::Mutex;
 
 use crate::horizon_api_shim::mod_api::{
-    ClientHost, ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks, KeyAction,
-    InputKeyEvent, ScreenCharTypedPreEvent, ScreenKeyPressedPreEvent,
+    ClientHost, ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks,
+    InputKeyEvent, KeyAction, ScreenCharTypedPreEvent, ScreenKeyPressedPreEvent,
     ScreenMouseButtonPressedPreEvent, ScreenMouseButtonReleasedPreEvent,
     ScreenMouseDraggedPreEvent, ScreenMouseScrolledPreEvent, ScreenRenderPostEvent,
 };
