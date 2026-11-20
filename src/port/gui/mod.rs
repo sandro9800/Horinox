@@ -452,9 +452,15 @@ impl ClickGui {
                 continue;
             }
             for name in shared.group(category) {
+                let description_matches = !query.is_empty()
+                    && shared
+                        .modules
+                        .base(name)
+                        .is_some_and(|base| base.description.to_lowercase().contains(&query));
                 if query.is_empty()
                     || name.to_lowercase().contains(&query)
                     || shared.title_of(name).to_lowercase().contains(&query)
+                    || description_matches
                 {
                     out.push((category, name));
                 }
