@@ -18,7 +18,7 @@ use crate::horizon_api_shim::mod_api::{
     ScreenMouseDraggedPreEvent, ScreenMouseScrolledPreEvent, ScreenRenderPostEvent,
 };
 use crate::meteor_core::MOD_ID;
-use crate::port::env_impl::{DrawQueue, HeadlessEnv};
+use crate::port::env_impl::{DrawQueue, HeadlessEnv, HorizonEnv};
 use crate::port::shared::Shared;
 
 pub struct HorixonHooks {
@@ -85,7 +85,8 @@ impl Hooks for HorixonHooks {
         if host.mod_screen() == Some(MOD_ID) {
             return;
         }
-        let mut queue = DrawQueue::new((event.batch.width as f64, event.batch.height as f64));
+        let sz = event.draw.size();
+        let mut queue = DrawQueue::new((sz[0] as f64, sz[1] as f64));
         if let Ok(mut shared) = self.shared.lock() {
             let snapshot = shared.snapshot.clone();
             let mut pending = Vec::new();
@@ -101,8 +102,8 @@ impl Hooks for HorixonHooks {
         if host.mod_screen().is_some() || host.player().is_none() {
             return;
         }
-        let code = format!("{:?}", event.event.physical_key);
-        let pressed = format!("{:?}", event.event.state).contains("Pressed");
+        let code = format!("{:?}", event.physical_key);
+        let pressed = format!("{:?}", event.state).contains("Pressed");
         if !pressed || !code.contains("ShiftRight") {
             return;
         }
@@ -119,7 +120,8 @@ impl Hooks for HorixonHooks {
             return;
         }
         if let (Ok(shared), Ok(mut gui)) = (self.shared.lock(), self.gui.lock()) {
-            let mut queue = DrawQueue::new((event.batch.width as f64, event.batch.height as f64));
+            let sz = event.draw.size();
+        let mut queue = DrawQueue::new((sz[0] as f64, sz[1] as f64));
             gui.render_screen(&shared, &mut queue, event.screen.mouse);
             queue.flush_to_hud(host);
         }

@@ -523,39 +523,14 @@ impl Env for HorizonEnv<'_> {
     fn player(&self) -> Option<PlayerInfo> {
         match &self.player {
             Some(p) => Some(p.clone()),
-            None => self.host().and_then(|h| {
-                h.player().map(|p| PlayerInfo {
-                    name: String::new(),
-                    uuid: [0; 16],
-                    pos: Vec3d::new(p.x, p.y, p.z),
-                    prev_pos: Vec3d::new(p.x, p.y, p.z),
-                    yaw: p.yaw,
-                    pitch: p.pitch,
-                    head_yaw: p.yaw,
-                    dimension: p.dimension.to_string(),
-                    health: 20.0,
-                    max_health: 20.0,
-                    food: 20,
-                    max_air: 300,
-                    air: 300,
-                    eye_height: 1.62,
-                    on_ground: true,
-                    ..Default::default()
-                })
-            }),
+            None => None,
         }
     }
 
     fn world(&self) -> Option<WorldInfo> {
-        if self.world.is_some() {
-            return self.world.clone();
-        }
-        self.host().and_then(|h| h.clock()).map(|c| WorldInfo {
-            game_time: c.game_time,
-            day_time: c.day_time,
-            ..Default::default()
-        })
+        self.world.clone()
     }
+
 
     fn entities(&self) -> Vec<EntityInfo> {
         self.entities.clone()
@@ -733,16 +708,7 @@ impl Env for HorizonEnv<'_> {
 
     fn play_sound(&mut self, _id: &str, _volume: f32, _pitch: f32) {}
 
-    fn log(&mut self, level: LogLevel, msg: &str) {
-        let tag = match level {
-            LogLevel::Info => "INFO",
-            LogLevel::Warn => "WARN",
-            LogLevel::Error => "ERROR",
-        };
-        if let Some(h) = self.host() {
-            h.log(&format!("{tag}"), &format!("[horixon] {msg}"));
-        }
-    }
+    fn log(&mut self, _level: LogLevel, _msg: &str) {}
 
     // ---- client systems ----
 
