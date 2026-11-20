@@ -6,3 +6,5 @@ pub mod gui;
 pub mod hud;
 pub mod modules;
 pub mod shared;
+
+pub const VERSION: &str = "0.5.0";
