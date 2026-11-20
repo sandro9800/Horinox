@@ -167,6 +167,8 @@ impl DrawQueue {
         }
     }
 
+}
+
 impl Renderer for DrawQueue {
     fn line(&mut self, from: Vec3d, to: Vec3d, color: u32, width: f32, through_walls: bool) {
         self.ops.push(Draw::Line {
