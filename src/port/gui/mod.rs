@@ -646,9 +646,11 @@ impl ClickGui {
     }
 
     fn slider_rect(&self, _module: &str) -> (f64, f64) {
+        let s = self.scale;
+        let width = (self.settings_list.w * 0.34).clamp(36.0 * s, 88.0 * s);
         (
-            self.settings_list.x + self.settings_list.w - 104.0 * self.scale,
-            88.0 * self.scale,
+            self.settings_list.x + self.settings_list.w - width - 12.0 * s,
+            width,
         )
     }
 
