@@ -235,6 +235,12 @@ impl ClickGui {
             _ => {}
         }
 
+        // Let text-input keys stay with the search field instead of activating or
+        // navigating modules behind it.
+        if self.search_focused {
+            return false;
+        }
+
         if self.settings_focus {
             match key {
                 265 => self.move_setting(shared, -1),
