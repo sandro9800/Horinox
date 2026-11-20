@@ -19,7 +19,7 @@ use crate::meteor_core::setting::{BoolSet, ColorSet, EnumSet, IntSet, ListSet};
 
 use super::{
     allows, can_break, describe, face_from_name, is_within, listed, packet_field, packet_pos,
-    player_action_kind, rotate_to, visible, PLAYER_ACTION,
+    player_action_kind, rotate_to, PLAYER_ACTION,
 };
 use std::collections::HashSet;
 

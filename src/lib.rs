@@ -64,7 +64,7 @@ fn glfw_key(key: &str) -> Option<i32> {
 impl Hooks for HorixonHooks {
     fn client_tick_pre(&self, host: &mut dyn ClientHost, _event: &mut ClientTickPreEvent) {
         if let Ok(mut shared) = self.shared.lock() {
-            shared.in_world = host.player().is_some();
+            shared.in_world = false;
             shared.tick(host, None, None);
         }
     }
