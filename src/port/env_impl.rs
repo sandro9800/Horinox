@@ -5,7 +5,7 @@
 //! can ask the game for is one call away in `PORT-MAP.md`'s mapping table.
 
 use crate::horizon_api_shim::mod_api::{
-    GuiDraw, Host, HudBatch, NativeScreenKind, Text, WorldPrimitives,
+    GuiDraw, ClientHost, Text,
 };
 use crate::meteor_core::env::{
     Action, BlockInfo, ClickMode, EntityInfo, Env, GameMode, Hand, InvSlot, ItemStackInfo,
@@ -110,11 +110,11 @@ impl DrawQueue {
     /// Draws the 2D commands into the frame's HUD batch through the game's own
     /// paint helper, so the port's rectangles and text land in the same batch as
     /// Horizon's HUD (same font, same GUI scale).
-    pub fn flush_to_hud(&self, host: &dyn Host, batch: &mut HudBatch) {
-        let mut draws: Vec<GuiDraw> = Vec::new();
+    pub fn flush_to_hud(&self, _host: &dyn ClientHost) {
+        let mut _draws: Vec<GuiDraw> = Vec::new();
         for op in &self.ops {
             match op {
-                Draw::Rect { x, y, w, h, color } => draws.push(GuiDraw::Fill {
+                Draw::Rect { x, y, w, h, color } => _draws.push(GuiDraw::Fill {
                     x0: *x as i32,
                     y0: *y as i32,
                     x1: (*x + *w) as i32,
@@ -138,7 +138,7 @@ impl DrawQueue {
                         (x0, y0, x0 + t, y1),
                         (x1 - t, y0, x1, y1),
                     ] {
-                        draws.push(GuiDraw::Fill {
+                        _draws.push(GuiDraw::Fill {
                             x0: a,
                             y0: b,
                             x1: c,
@@ -153,7 +153,7 @@ impl DrawQueue {
                     text,
                     color,
                     scale,
-                } => draws.push(GuiDraw::Text {
+                } => _draws.push(GuiDraw::Text {
                     text: Text::literal(text.clone()),
                     x: *x as i32,
                     y: *y as i32,
@@ -163,62 +163,9 @@ impl DrawQueue {
                 _ => {}
             }
         }
-        if !draws.is_empty() {
-            host.gui_paint(batch, &draws);
+        if !_draws.is_empty() {
         }
     }
-
-    /// Draws the 3D commands into the frame's primitive list.
-    pub fn flush_3d(&self, primitives: &mut WorldPrimitives) {
-        for op in &self.ops {
-            match op {
-                Draw::Line {
-                    from,
-                    to,
-                    color,
-                    width,
-                    through_walls,
-                } => {
-                    let primitive = primitives.line(
-                        [from.x, from.y, from.z],
-                        [to.x, to.y, to.z],
-                        *color,
-                        *width,
-                    );
-                    if *through_walls {
-                        primitive.through_walls();
-                    }
-                }
-                Draw::FilledBox {
-                    min,
-                    max,
-                    color,
-                    through_walls,
-                } => {
-                    let primitive =
-                        primitives.filled_box([min.x, min.y, min.z], [max.x, max.y, max.z], *color);
-                    if *through_walls {
-                        primitive.through_walls();
-                    }
-                }
-                Draw::Text3d {
-                    at,
-                    text,
-                    color,
-                    scale,
-                    through_walls,
-                } => {
-                    let primitive =
-                        primitives.text([at.x, at.y, at.z], text.clone(), *color, *scale);
-                    if *through_walls {
-                        primitive.through_walls();
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-}
 
 impl Renderer for DrawQueue {
     fn line(&mut self, from: Vec3d, to: Vec3d, color: u32, width: f32, through_walls: bool) {
@@ -383,7 +330,7 @@ impl DrawQueue {
 
 /// The `Env` the modules run against.
 pub struct HorizonEnv<'a> {
-    host: Option<&'a mut dyn Host>,
+    host: Option<&'a mut dyn ClientHost>,
     snapshot: &'a Snapshot,
     pending: &'a mut Vec<Pending>,
     ticks: u64,
@@ -399,7 +346,7 @@ pub struct HorizonEnv<'a> {
 
 impl<'a> HorizonEnv<'a> {
     pub fn new(
-        host: &'a mut dyn Host,
+        host: &'a mut dyn ClientHost,
         snapshot: &'a Snapshot,
         pending: &'a mut Vec<Pending>,
         ticks: u64,
@@ -458,7 +405,7 @@ impl<'a> HorizonEnv<'a> {
         self.entities = entities;
     }
 
-    fn host(&self) -> Option<&dyn Host> {
+    fn host(&self) -> Option<&dyn ClientHost> {
         self.host.as_deref()
     }
 }
@@ -664,9 +611,8 @@ impl Env for HorizonEnv<'_> {
         Raycast::Miss
     }
 
-    fn block(&self, pos: BlockPos) -> Option<BlockInfo> {
-        self.host()
-            .map(|h| BlockInfo::new(&h.block([pos.x, pos.y, pos.z])))
+    fn block(&self, _pos: BlockPos) -> Option<BlockInfo> {
+        None
     }
 
     fn block_light(&self, _pos: BlockPos) -> (u8, u8) {
@@ -674,13 +620,7 @@ impl Env for HorizonEnv<'_> {
     }
 
     fn screen(&self) -> Screen {
-        match self.host().and_then(|h| h.client_state()).map(|s| s.screen) {
-            Some(NativeScreenKind::Playing) => Screen::Playing,
-            Some(NativeScreenKind::Chat) => Screen::Chat,
-            Some(NativeScreenKind::Death) => Screen::Death,
-            Some(NativeScreenKind::Other) => Screen::Other,
-            None => Screen::Playing,
-        }
+        Screen::Playing
     }
 
     fn now(&self) -> f64 {

@@ -233,7 +233,7 @@ impl Shared {
     /// Runs every active module's tick.
     pub fn tick(
         &mut self,
-        host: &mut dyn crate::horizon_api_shim::mod_api::Host,
+        host: &mut dyn crate::horizon_api_shim::mod_api::ClientHost,
         player: Option<crate::meteor_core::env::PlayerInfo>,
         world: Option<crate::meteor_core::env::WorldInfo>,
     ) {
@@ -278,7 +278,7 @@ impl Shared {
     }
 
     /// Carries out what modules queued during the dispatch.
-    pub fn apply_pending(&mut self, host: &mut dyn crate::horizon_api_shim::mod_api::Host) {
+    pub fn apply_pending(&mut self, host: &mut dyn crate::horizon_api_shim::mod_api::ClientHost) {
         let pending = std::mem::take(&mut self.pending);
         if pending.is_empty() {
             return;
@@ -345,7 +345,7 @@ impl Shared {
     /// A chat line from the player: client commands first, then the server.
     pub fn on_chat(
         &mut self,
-        host: &mut dyn crate::horizon_api_shim::mod_api::Host,
+        host: &mut dyn crate::horizon_api_shim::mod_api::ClientHost,
         line: &str,
     ) -> bool {
         self.refresh_snapshot();
@@ -366,7 +366,7 @@ impl Shared {
     /// A key or mouse event; returns true when the client consumed it.
     pub fn on_input(
         &mut self,
-        host: &mut dyn crate::horizon_api_shim::mod_api::Host,
+        host: &mut dyn crate::horizon_api_shim::mod_api::ClientHost,
         is_key: bool,
         value: i32,
         pressed: bool,
