@@ -531,7 +531,6 @@ impl Env for HorizonEnv<'_> {
         self.world.clone()
     }
 
-
     fn entities(&self) -> Vec<EntityInfo> {
         self.entities.clone()
     }
