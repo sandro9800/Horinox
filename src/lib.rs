@@ -12,7 +12,7 @@ pub mod port;
 use std::sync::Mutex;
 
 use crate::horizon_api_shim::mod_api::{
-    ClientHost, ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks,
+    ClientHost, ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks, KeyAction,
     InputKeyEvent, ScreenCharTypedPreEvent, ScreenKeyPressedPreEvent,
     ScreenMouseButtonPressedPreEvent, ScreenMouseButtonReleasedPreEvent,
     ScreenMouseDraggedPreEvent, ScreenMouseScrolledPreEvent, ScreenRenderPostEvent,
@@ -85,7 +85,7 @@ impl Hooks for HorixonHooks {
         if host.mod_screen() == Some(MOD_ID) {
             return;
         }
-        let sz = event.draw.size();
+        let sz = event.batch.size();
         let mut queue = DrawQueue::new((sz[0] as f64, sz[1] as f64));
         if let Ok(mut shared) = self.shared.lock() {
             let snapshot = shared.snapshot.clone();
@@ -102,9 +102,7 @@ impl Hooks for HorixonHooks {
         if host.mod_screen().is_some() || host.player().is_none() {
             return;
         }
-        let code = format!("{:?}", event.physical_key);
-        let pressed = format!("{:?}", event.state).contains("Pressed");
-        if !pressed || !code.contains("ShiftRight") {
+        if event.action != KeyAction::Press || event.key != "key.keyboard.right.shift" {
             return;
         }
         let Ok(mut gui) = self.gui.lock() else { return };
