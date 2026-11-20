@@ -99,7 +99,7 @@ impl Hooks for HorixonHooks {
     }
 
     fn input_key(&self, host: &mut dyn ClientHost, event: &mut InputKeyEvent<'_>) {
-        if host.mod_screen().is_some() || host.player().is_none() {
+        if host.mod_screen().is_some() {
             return;
         }
         if event.action != KeyAction::Press || event.key != "key.keyboard.right.shift" {
@@ -138,9 +138,6 @@ impl Hooks for HorixonHooks {
         };
         if let Some(key) = glfw_key(event.key) {
             gui.on_key(&mut shared, key, true, event.modifiers as i32);
-        }
-        if !gui.is_open() {
-            host.mod_screen_close(MOD_ID);
         }
         Flow::Cancel
     }

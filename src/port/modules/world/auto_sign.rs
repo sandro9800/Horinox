@@ -16,7 +16,7 @@ use crate::meteor_core::math::BlockPos;
 use crate::meteor_core::module::{Module, ModuleBase};
 use crate::meteor_core::setting::IntSet;
 
-use super::{describe, packet_field, packet_pos, pos_packet, set_packet_field};
+use super::{describe, packet_pos, pos_packet, set_packet_field};
 
 /// One queued `ServerboundSignUpdatePacket`.
 #[derive(Clone, Debug, PartialEq)]

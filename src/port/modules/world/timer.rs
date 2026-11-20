@@ -33,7 +33,7 @@ impl Timer {
             "timer",
             "Changes the speed of everything in your game.",
         );
-        let mut s = base.settings_mut();
+        let s = base.settings_mut();
         let g = s.default_group();
         let multiplier = g.double_setting("multiplier", 1.0, 0.1, 1000.0, 2);
         super::describe(g, "The timer multiplier amount.");
