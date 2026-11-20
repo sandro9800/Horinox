@@ -804,6 +804,18 @@ impl ClickGui {
                 if active { accent } else { MUTED },
             ));
         }
+        if self.module_items(shared).is_empty() {
+            emit(UiDraw::Text(
+                self.module_list.x + 12.0 * s,
+                self.module_list.y + 14.0 * s,
+                if self.search.is_empty() {
+                    "No modules in this category".into()
+                } else {
+                    "No modules match your search".into()
+                },
+                muted,
+            ));
+        }
         emit(UiDraw::Text(
             self.settings_area.x + 8.0 * s,
             self.settings_area.y + 8.0 * s,
@@ -823,8 +835,8 @@ impl ClickGui {
                 .base(module)
                 .map(|base| base.description.to_string())
                 .unwrap_or_default();
-            let desc = if description.len() > 80 {
-                format!("{}...", &description[..77])
+            let desc = if description.chars().count() > 80 {
+                format!("{}...", description.chars().take(77).collect::<String>())
             } else {
                 description
             };
@@ -844,13 +856,14 @@ impl ClickGui {
                 ));
             } else {
                 for (index, setting, rect) in self.setting_rects(shared) {
-                    if self.settings_focus && index == self.selected_setting {
-                        emit(UiDraw::Outline(rect, accent));
-                    }
                     let Some((_, display)) = rows.iter().find(|(name, _)| *name == setting) else {
                         continue;
                     };
                     emit(UiDraw::Fill(rect, SURFACE));
+                    // Draw focus after the row background so keyboard selection stays visible.
+                    if self.settings_focus && index == self.selected_setting {
+                        emit(UiDraw::Outline(rect, accent));
+                    }
                     emit(UiDraw::Text(
                         rect.x + 8.0 * s,
                         rect.y + 9.0 * s,
