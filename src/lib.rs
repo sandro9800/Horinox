@@ -121,7 +121,7 @@ impl Hooks for HorixonHooks {
         }
         if let (Ok(shared), Ok(mut gui)) = (self.shared.lock(), self.gui.lock()) {
             let sz = event.draw.size();
-        let mut queue = DrawQueue::new((sz[0] as f64, sz[1] as f64));
+            let mut queue = DrawQueue::new((sz[0] as f64, sz[1] as f64));
             gui.render_screen(&shared, &mut queue, event.screen.mouse);
             queue.flush_to_hud(host);
         }
