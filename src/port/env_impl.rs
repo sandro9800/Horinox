@@ -624,7 +624,7 @@ impl Env for HorizonEnv<'_> {
     }
 
     fn can_update(&self) -> bool {
-        self.player.is_some() || self.host().and_then(|h| h.player()).is_some()
+        self.player.is_some()
     }
 
     fn ticks(&self) -> u64 {

@@ -78,7 +78,7 @@ impl VeinMiner {
             "vein-miner",
             "Mines all nearby blocks with this type",
         );
-        let mut s = base.settings_mut();
+        let s = base.settings_mut();
         let g = s.default_group();
 
         let blocks = g.list_setting(
