@@ -12,10 +12,10 @@ pub mod port;
 use std::sync::Mutex;
 
 use crate::horizon_api_shim::mod_api::{
-    ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks, Host, InputKeyEvent,
+    ClientTickPostEvent, ClientTickPreEvent, Flow, GuiRenderPostEvent, Hooks, ClientHost, InputKeyEvent,
     ScreenCharTypedPreEvent, ScreenKeyPressedPreEvent, ScreenMouseButtonPressedPreEvent,
     ScreenMouseButtonReleasedPreEvent, ScreenMouseDraggedPreEvent, ScreenMouseScrolledPreEvent,
-    ScreenRenderPostEvent, WorldPrimitivesEvent,
+    ScreenRenderPostEvent,
 };
 use crate::meteor_core::MOD_ID;
 use crate::port::env_impl::{DrawQueue, HeadlessEnv};
@@ -62,14 +62,14 @@ fn glfw_key(key: &str) -> Option<i32> {
 
 #[mod_api::horizon_mod]
 impl Hooks for HorixonHooks {
-    fn client_tick_pre(&self, host: &mut dyn Host, _event: &mut ClientTickPreEvent) {
+    fn client_tick_pre(&self, host: &mut dyn ClientHost, _event: &mut ClientTickPreEvent) {
         if let Ok(mut shared) = self.shared.lock() {
             shared.in_world = host.player().is_some();
             shared.tick(host, None, None);
         }
     }
 
-    fn client_tick_post(&self, host: &mut dyn Host, _event: &mut ClientTickPostEvent) {
+    fn client_tick_post(&self, host: &mut dyn ClientHost, _event: &mut ClientTickPostEvent) {
         let own_screen = host.mod_screen() == Some(MOD_ID);
         if let (Ok(mut shared), Ok(mut gui)) = (self.shared.lock(), self.gui.lock()) {
             if gui.is_open() && !own_screen {
@@ -81,7 +81,7 @@ impl Hooks for HorixonHooks {
         }
     }
 
-    fn gui_render_post(&self, host: &dyn Host, event: &mut GuiRenderPostEvent<'_>) {
+    fn gui_render_post(&self, host: &dyn ClientHost, event: &mut GuiRenderPostEvent<'_>) {
         if host.mod_screen() == Some(MOD_ID) {
             return;
         }
@@ -94,18 +94,11 @@ impl Hooks for HorixonHooks {
             shared.hud.render(&mut env, &mut queue);
             shared.modules.render_2d(&mut env, &mut queue);
         }
-        queue.flush_to_hud(host, event.batch);
+        queue.flush_to_hud(host);
     }
 
-    fn world_primitives(&self, _host: &dyn Host, event: &mut WorldPrimitivesEvent<'_>) {
-        let mut queue = DrawQueue::new((0.0, 0.0));
-        if let Ok(mut shared) = self.shared.lock() {
-            shared.render_world(&mut queue);
-        }
-        queue.flush_3d(event.primitives);
-    }
 
-    fn input_key(&self, host: &mut dyn Host, event: &mut InputKeyEvent<'_>) {
+    fn input_key(&self, host: &mut dyn ClientHost, event: &mut InputKeyEvent<'_>) {
         if host.mod_screen().is_some() || host.player().is_none() {
             return;
         }
@@ -122,20 +115,20 @@ impl Hooks for HorixonHooks {
         host.mod_screen_open(MOD_ID);
     }
 
-    fn screen_render_post(&self, host: &dyn Host, event: &mut ScreenRenderPostEvent<'_>) {
+    fn screen_render_post(&self, host: &dyn ClientHost, event: &mut ScreenRenderPostEvent<'_>) {
         if host.mod_screen() != Some(MOD_ID) {
             return;
         }
         if let (Ok(shared), Ok(mut gui)) = (self.shared.lock(), self.gui.lock()) {
             let mut queue = DrawQueue::new((event.batch.width as f64, event.batch.height as f64));
             gui.render_screen(&shared, &mut queue, event.screen.mouse);
-            queue.flush_to_hud(host, event.batch);
+            queue.flush_to_hud(host);
         }
     }
 
     fn screen_key_pressed_pre(
         &self,
-        host: &dyn Host,
+        host: &dyn ClientHost,
         event: &mut ScreenKeyPressedPreEvent<'_>,
     ) -> Flow {
         if host.mod_screen() != Some(MOD_ID) {
@@ -155,7 +148,7 @@ impl Hooks for HorixonHooks {
 
     fn screen_char_typed_pre(
         &self,
-        host: &dyn Host,
+        host: &dyn ClientHost,
         event: &mut ScreenCharTypedPreEvent<'_>,
     ) -> Flow {
         if host.mod_screen() != Some(MOD_ID) {
@@ -169,7 +162,7 @@ impl Hooks for HorixonHooks {
 
     fn screen_mouse_button_pressed_pre(
         &self,
-        host: &dyn Host,
+        host: &dyn ClientHost,
         event: &mut ScreenMouseButtonPressedPreEvent<'_>,
     ) -> Flow {
         if host.mod_screen() != Some(MOD_ID) {
@@ -186,7 +179,7 @@ impl Hooks for HorixonHooks {
 
     fn screen_mouse_button_released_pre(
         &self,
-        host: &dyn Host,
+        host: &dyn ClientHost,
         event: &mut ScreenMouseButtonReleasedPreEvent<'_>,
     ) -> Flow {
         if host.mod_screen() != Some(MOD_ID) {
@@ -203,7 +196,7 @@ impl Hooks for HorixonHooks {
 
     fn screen_mouse_dragged_pre(
         &self,
-        host: &dyn Host,
+        host: &dyn ClientHost,
         event: &mut ScreenMouseDraggedPreEvent<'_>,
     ) -> Flow {
         if host.mod_screen() != Some(MOD_ID) {
@@ -217,7 +210,7 @@ impl Hooks for HorixonHooks {
 
     fn screen_mouse_scrolled_pre(
         &self,
-        host: &dyn Host,
+        host: &dyn ClientHost,
         event: &mut ScreenMouseScrolledPreEvent<'_>,
     ) -> Flow {
         if host.mod_screen() != Some(MOD_ID) {
